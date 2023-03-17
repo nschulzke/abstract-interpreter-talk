@@ -2,15 +2,20 @@
 import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from 'node:process';
 import {parse} from "./parser";
-import {cstToString} from "./pretty_print";
+import {interpret, TinyValue} from "./interpreter";
 
 const rl = readline.createInterface({input, output});
 
 let text = "";
 (async () => {
     do {
-        text = await rl.question("Enter some text: ");
+        text = await rl.question("> ");
         const cst = parse(text);
-        console.log("Parse tree: ", cstToString(cst));
+        const sources: Record<string, TinyValue> = {
+            x: 10,
+            y: 20,
+            b: true,
+        }
+        console.log(interpret(cst, sources));
     } while (text !== "");
 })();
