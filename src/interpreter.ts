@@ -1,24 +1,25 @@
 import {
-    VariableAssignmentCstChildren,
-    SinkAssignmentCstChildren,
+    ArithmeticExpressionCstChildren,
+    BooleanLiteralCstChildren,
+    ChooseExpressionCstChildren,
+    ComparisonExpressionCstChildren,
     ExpressionCstChildren,
     FactorCstChildren,
+    NumberLiteralCstChildren,
+    OtherwiseClauseCstChildren,
     ParenthesisCstChildren,
     ProgramCstChildren,
+    SinkAssignmentCstChildren,
+    SourceReferenceCstChildren,
     StatementCstChildren,
     TermCstChildren,
-    BooleanLiteralCstChildren,
-    NumberLiteralCstChildren,
+    VariableAssignmentCstChildren,
     VariableReferenceCstChildren,
-    SourceReferenceCstChildren,
-    ArithmeticExpressionCstChildren,
-    ComparisonExpressionCstChildren,
-    ChooseExpressionCstChildren, WhenClauseCstChildren, OtherwiseClauseCstChildren
+    WhenClauseCstChildren
 } from "./json_cst";
 import {BaseCstVisitor} from "./parser";
 import {CstNode} from "chevrotain";
-
-export type TinyValue = boolean | number | undefined;
+import {TinyValue} from "./types";
 
 class InterpreterVisitor<TSources extends Record<string, TinyValue>> extends BaseCstVisitor {
     sources: TSources;

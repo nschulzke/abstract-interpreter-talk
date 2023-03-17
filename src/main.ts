@@ -2,7 +2,8 @@
 import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from 'node:process';
 import {parse} from "./parser";
-import {interpret, TinyValue} from "./interpreter";
+import {interpret} from "./interpreter";
+import {TinyValue} from "./types";
 
 const rl = readline.createInterface({input, output});
 
