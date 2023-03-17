@@ -1,0 +1,21 @@
+{
+  "name": "abstract-interpreter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx ts-node src/main.ts",
+    "start-notypecheck": "npx ts-node --transpile-only src/main.ts",
+    "build": "npx tsc",
+    "gendts": "npx ts-node src/gen_dts_signatures.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chevrotain": "^10.5.0",
+    "typescript": "^5.0.2",
+    "ts-node": "^10.9.1",
+    "@types/node": "^18.15.3"
+  }
+}
