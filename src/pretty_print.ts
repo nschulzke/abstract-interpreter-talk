@@ -10,7 +10,10 @@ import {
     BooleanLiteralCstChildren,
     NumberLiteralCstChildren,
     VariableReferenceCstChildren,
-    SourceReferenceCstChildren
+    SourceReferenceCstChildren,
+    ArithmeticExpressionCstChildren,
+    ComparisonExpressionCstChildren,
+    ChooseExpressionCstChildren, WhenClauseCstChildren, OtherwiseClauseCstChildren
 } from "./json_cst";
 import {BaseCstVisitor} from "./parser";
 import {CstNode} from "chevrotain";
@@ -51,6 +54,47 @@ class SExpressionVisitor extends BaseCstVisitor {
     }
 
     expression(ctx: ExpressionCstChildren): string {
+        if (ctx.chooseExpression) {
+            return this.visit(ctx.chooseExpression);
+        } else if (ctx.comparisonExpression) {
+            return this.visit(ctx.comparisonExpression);
+        } else {
+            return "(expression)";
+        }
+    }
+
+    chooseExpression(ctx: ChooseExpressionCstChildren): string {
+        if (ctx.whenClause) {
+            const whenClauses = ctx.whenClause.map(whenClause => this.visit(whenClause)).join(" ");
+            const otherwiseClause = ctx.otherwiseClause ? ` ${this.visit(ctx.otherwiseClause)}` : "";
+            return `(chooseExpression ${whenClauses}${otherwiseClause})`;
+        } else {
+            return "(chooseExpression)";
+        }
+    }
+
+    whenClause(ctx: WhenClauseCstChildren): string {
+        return `(whenClause ${this.visit(ctx.predicate)} ${this.visit(ctx.consequent)})`;
+    }
+
+    otherwiseClause(ctx: OtherwiseClauseCstChildren): string {
+        return `(otherwiseClause ${this.visit(ctx.consequent)})`;
+    }
+
+    comparisonExpression(ctx: ComparisonExpressionCstChildren): string {
+        if (ctx.rhs) {
+            const comparisonOp = ctx.Less || ctx.LessEqual || ctx.Greater || ctx.GreaterEqual || ctx.EqualEqual || ctx.BangEqual;
+            if (comparisonOp) {
+                return `(${comparisonOp[0].image} ${this.visit(ctx.lhs)} ${this.visit(ctx.rhs)})`;
+            } else {
+                return `(? ${this.visit(ctx.lhs)} ${this.visit(ctx.rhs)})`;
+            }
+        } else {
+            return this.visit(ctx.lhs);
+        }
+    }
+
+    arithmeticExpression(ctx: ArithmeticExpressionCstChildren): string {
         if (ctx.rhs) {
             const plusMinus = ctx.Plus || ctx.Minus;
             if (plusMinus) {

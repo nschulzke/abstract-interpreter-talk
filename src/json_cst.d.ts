@@ -17,7 +17,6 @@ export interface StatementCstNode extends CstNode {
 export type StatementCstChildren = {
   variableAssignment?: VariableAssignmentCstNode[];
   sinkAssignment?: SinkAssignmentCstNode[];
-  Semi?: IToken[];
 };
 
 export interface VariableAssignmentCstNode extends CstNode {
@@ -48,6 +47,63 @@ export interface ExpressionCstNode extends CstNode {
 }
 
 export type ExpressionCstChildren = {
+  chooseExpression?: ChooseExpressionCstNode[];
+  comparisonExpression?: ComparisonExpressionCstNode[];
+};
+
+export interface ChooseExpressionCstNode extends CstNode {
+  name: "chooseExpression";
+  children: ChooseExpressionCstChildren;
+}
+
+export type ChooseExpressionCstChildren = {
+  whenClause?: WhenClauseCstNode[];
+  otherwiseClause: OtherwiseClauseCstNode[];
+};
+
+export interface WhenClauseCstNode extends CstNode {
+  name: "whenClause";
+  children: WhenClauseCstChildren;
+}
+
+export type WhenClauseCstChildren = {
+  When: IToken[];
+  predicate: ExpressionCstNode[];
+  consequent: ExpressionCstNode[];
+};
+
+export interface OtherwiseClauseCstNode extends CstNode {
+  name: "otherwiseClause";
+  children: OtherwiseClauseCstChildren;
+}
+
+export type OtherwiseClauseCstChildren = {
+  Otherwise: IToken[];
+  consequent: ExpressionCstNode[];
+};
+
+export interface ComparisonExpressionCstNode extends CstNode {
+  name: "comparisonExpression";
+  children: ComparisonExpressionCstChildren;
+}
+
+export type ComparisonExpressionCstChildren = {
+  lhs: ArithmeticExpressionCstNode[];
+  Less?: IToken[];
+  Greater?: IToken[];
+  LessEqual?: IToken[];
+  GreaterEqual?: IToken[];
+  EqualEqual?: IToken[];
+  BangEqual?: IToken[];
+  rhs?: ArithmeticExpressionCstNode[];
+};
+
+export interface ArithmeticExpressionCstNode extends CstNode {
+  name: "arithmeticExpression";
+  children: ArithmeticExpressionCstChildren;
+}
+
+export type ArithmeticExpressionCstChildren = {
   lhs: TermCstNode[];
   Plus?: IToken[];
   Minus?: IToken[];
@@ -136,6 +192,11 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   variableAssignment(children: VariableAssignmentCstChildren, param?: IN): OUT;
   sinkAssignment(children: SinkAssignmentCstChildren, param?: IN): OUT;
   expression(children: ExpressionCstChildren, param?: IN): OUT;
+  chooseExpression(children: ChooseExpressionCstChildren, param?: IN): OUT;
+  whenClause(children: WhenClauseCstChildren, param?: IN): OUT;
+  otherwiseClause(children: OtherwiseClauseCstChildren, param?: IN): OUT;
+  comparisonExpression(children: ComparisonExpressionCstChildren, param?: IN): OUT;
+  arithmeticExpression(children: ArithmeticExpressionCstChildren, param?: IN): OUT;
   term(children: TermCstChildren, param?: IN): OUT;
   factor(children: FactorCstChildren, param?: IN): OUT;
   sourceReference(children: SourceReferenceCstChildren, param?: IN): OUT;

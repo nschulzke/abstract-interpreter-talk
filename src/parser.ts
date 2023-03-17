@@ -12,14 +12,22 @@ const Mod = createToken({name: "Mod", pattern: /%/});
 const LParen = createToken({name: "LParen", pattern: /\(/});
 const RParen = createToken({name: "RParen", pattern: /\)/});
 
+const BangEqual = createToken({name: "BangEqual", pattern: /!=/});
+const LessEqual = createToken({name: "LessEqual", pattern: /<=/});
+const GreaterEqual = createToken({name: "GreaterEqual", pattern: />=/});
+const EqualEqual = createToken({name: "EqualEqual", pattern: /==/});
+const Less = createToken({name: "Less", pattern: /</});
+const Greater = createToken({name: "Greater", pattern: />/});
+
 const Equal = createToken({name: "Equal", pattern: /=/});
 const Colon = createToken({name: "Colon", pattern: /:/});
 const Dot = createToken({name: "Dot", pattern: /\./});
-const Semi = createToken({name: "Semi", pattern: /;/});
 
 const True = createToken({name: "True", pattern: /true/});
 const False = createToken({name: "False", pattern: /false/});
 const This = createToken({name: "This", pattern: /this/});
+const When = createToken({name: "When", pattern: /when/});
+const Otherwise = createToken({name: "Otherwise", pattern: /otherwise/});
 
 const Whitespace = createToken({
     name: "Whitespace",
@@ -37,13 +45,20 @@ const allTokens = [
     Mod,
     LParen,
     RParen,
+    BangEqual,
+    LessEqual,
+    GreaterEqual,
+    EqualEqual,
+    Less,
+    Greater,
     Equal,
     Colon,
     Dot,
-    Semi,
     True,
     False,
     This,
+    When,
+    Otherwise,
     Identifier,
 ];
 
@@ -60,7 +75,6 @@ class TinyParser extends CstParser {
                 {ALT: () => this.SUBRULE(this.variableAssignment)},
                 {ALT: () => this.SUBRULE(this.sinkAssignment)},
             ]);
-            this.CONSUME(Semi);
         })
     });
 
@@ -77,6 +91,47 @@ class TinyParser extends CstParser {
     });
 
     public expression = this.RULE("expression", () => {
+        this.OR([
+            {ALT: () => this.SUBRULE(this.chooseExpression)},
+            {ALT: () => this.SUBRULE(this.comparisonExpression)},
+        ]);
+    });
+
+    public chooseExpression = this.RULE("chooseExpression", () => {
+        this.SUBRULE(this.whenClause)
+        this.MANY(() => {
+            this.SUBRULE2(this.whenClause);
+        });
+        this.SUBRULE(this.otherwiseClause);
+    });
+
+    public whenClause = this.RULE("whenClause", () => {
+        this.CONSUME(When);
+        this.SUBRULE(this.expression, {LABEL: "predicate"});
+        this.SUBRULE2(this.expression, {LABEL: "consequent"});
+    });
+
+    public otherwiseClause = this.RULE("otherwiseClause", () => {
+        this.CONSUME(Otherwise);
+        this.SUBRULE(this.expression, {LABEL: "consequent"});
+    });
+
+    public comparisonExpression = this.RULE("comparisonExpression", () => {
+        this.SUBRULE(this.arithmeticExpression, {LABEL: "lhs"});
+        this.MANY(() => {
+            this.OR([
+                {ALT: () => this.CONSUME(Less)},
+                {ALT: () => this.CONSUME(Greater)},
+                {ALT: () => this.CONSUME(LessEqual)},
+                {ALT: () => this.CONSUME(GreaterEqual)},
+                {ALT: () => this.CONSUME(EqualEqual)},
+                {ALT: () => this.CONSUME(BangEqual)},
+            ]);
+            this.SUBRULE2(this.arithmeticExpression, {LABEL: "rhs"});
+        });
+    });
+
+    public arithmeticExpression = this.RULE("arithmeticExpression", () => {
         this.SUBRULE(this.term, {LABEL: "lhs"});
         this.MANY(() => {
             this.OR([
