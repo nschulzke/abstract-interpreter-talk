@@ -13,9 +13,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^18.15.3",
     "chevrotain": "^10.5.0",
-    "typescript": "^5.0.2",
+    "interval-arithmetic": "^1.1.2",
     "ts-node": "^10.9.1",
-    "@types/node": "^18.15.3"
+    "typescript": "^5.0.2"
   }
 }

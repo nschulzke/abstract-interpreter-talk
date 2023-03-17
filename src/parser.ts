@@ -7,7 +7,6 @@ const Plus = createToken({name: "Plus", pattern: /\+/});
 const Minus = createToken({name: "Minus", pattern: /-/});
 const Mult = createToken({name: "Mult", pattern: /\*/});
 const Div = createToken({name: "Div", pattern: /\//});
-const Mod = createToken({name: "Mod", pattern: /%/});
 
 const LParen = createToken({name: "LParen", pattern: /\(/});
 const RParen = createToken({name: "RParen", pattern: /\)/});
@@ -42,7 +41,6 @@ const allTokens = [
     Minus,
     Mult,
     Div,
-    Mod,
     LParen,
     RParen,
     BangEqual,
@@ -148,7 +146,6 @@ class TinyParser extends CstParser {
             this.OR([
                 {ALT: () => this.CONSUME(Mult)},
                 {ALT: () => this.CONSUME(Div)},
-                {ALT: () => this.CONSUME(Mod)},
             ]);
             this.SUBRULE2(this.factor, {LABEL: "rhs"});
         });

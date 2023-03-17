@@ -109,9 +109,9 @@ class SExpressionVisitor extends BaseCstVisitor {
 
     term(ctx: TermCstChildren): string {
         if (ctx.rhs) {
-            const multDivMod = ctx.Mult || ctx.Div || ctx.Mod;
-            if (multDivMod) {
-                return `(${multDivMod[0].image} ${this.visit(ctx.lhs)} ${this.visit(ctx.rhs)})`;
+            const multDiv = ctx.Mult || ctx.Div;
+            if (multDiv) {
+                return `(${multDiv[0].image} ${this.visit(ctx.lhs)} ${this.visit(ctx.rhs)})`;
             } else {
                 return `(? ${this.visit(ctx.lhs)} ${this.visit(ctx.rhs)})`;
             }

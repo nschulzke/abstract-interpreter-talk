@@ -57,7 +57,7 @@ export interface ChooseExpressionCstNode extends CstNode {
 }
 
 export type ChooseExpressionCstChildren = {
-  whenClause?: WhenClauseCstNode[];
+  whenClause: (WhenClauseCstNode)[];
   otherwiseClause: OtherwiseClauseCstNode[];
 };
 
@@ -119,7 +119,6 @@ export type TermCstChildren = {
   lhs: FactorCstNode[];
   Mult?: IToken[];
   Div?: IToken[];
-  Mod?: IToken[];
   rhs?: FactorCstNode[];
 };
 
