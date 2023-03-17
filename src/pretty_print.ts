@@ -1,11 +1,16 @@
 import {
-    AssignmentCstChildren,
+    VariableAssignmentCstChildren,
+    SinkAssignmentCstChildren,
     ExpressionCstChildren,
     FactorCstChildren,
     ParenthesisCstChildren,
     ProgramCstChildren,
     StatementCstChildren,
-    TermCstChildren
+    TermCstChildren,
+    BooleanLiteralCstChildren,
+    NumberLiteralCstChildren,
+    VariableReferenceCstChildren,
+    SourceReferenceCstChildren
 } from "./json_cst";
 import {BaseCstVisitor} from "./parser";
 import {CstNode} from "chevrotain";
@@ -28,15 +33,21 @@ class SExpressionVisitor extends BaseCstVisitor {
     }
 
     statement(ctx: StatementCstChildren): string {
-        if (ctx.assignment) {
-            return this.visit(ctx.assignment);
+        if (ctx.variableAssignment) {
+            return this.visit(ctx.variableAssignment);
+        } else if (ctx.sinkAssignment) {
+            return this.visit(ctx.sinkAssignment);
         } else {
             return "(statement)"
         }
     }
 
-    assignment(ctx: AssignmentCstChildren): string {
-        return `(assignment ${ctx.Identifier[0].image} ${this.visit(ctx.expression)})`;
+    variableAssignment(ctx: VariableAssignmentCstChildren): string {
+        return `(variableAssignment ${ctx.Identifier[0].image} ${this.visit(ctx.expression)})`;
+    }
+
+    sinkAssignment(ctx: SinkAssignmentCstChildren): string {
+        return `(sinkAssignment ${ctx.Identifier[0].image} ${this.visit(ctx.expression)})`;
     }
 
     expression(ctx: ExpressionCstChildren): string {
@@ -65,18 +76,41 @@ class SExpressionVisitor extends BaseCstVisitor {
         }
     }
 
-    factor(ctx: FactorCstChildren) {
+    factor(ctx: FactorCstChildren): string {
         if (ctx.parenthesis) {
             return this.visit(ctx.parenthesis);
-        } else if (ctx.Identifier) {
-            return ctx.Identifier[0].image;
-        } else if (ctx.Number) {
-            return ctx.Number[0].image;
+        } else if (ctx.numberLiteral) {
+            return this.visit(ctx.numberLiteral);
+        } else if (ctx.booleanLiteral) {
+            return this.visit(ctx.booleanLiteral);
+        } else if (ctx.variableReference) {
+            return this.visit(ctx.variableReference);
+        } else if (ctx.sourceReference) {
+            return this.visit(ctx.sourceReference);
+        } else {
+            return "(factor)";
         }
     }
 
-    parenthesis(ctx: ParenthesisCstChildren) {
+    parenthesis(ctx: ParenthesisCstChildren): string {
         return this.visit(ctx.expression);
+    }
+
+    booleanLiteral(ctx: BooleanLiteralCstChildren): string {
+        const trueFalse = ctx.True || ctx.False;
+        return trueFalse![0].image;
+    }
+
+    numberLiteral(ctx: NumberLiteralCstChildren): string {
+        return ctx.literal[0].image;
+    }
+
+    variableReference(ctx: VariableReferenceCstChildren): string {
+        return ctx.variable[0].image;
+    }
+
+    sourceReference(ctx: SourceReferenceCstChildren): string {
+        return ctx.source[0].image;
     }
 }
 

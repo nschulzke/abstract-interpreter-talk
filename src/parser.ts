@@ -1,7 +1,7 @@
 import {createToken, CstNode, CstParser, Lexer, Rule} from "chevrotain";
 
 const Number = createToken({name: "Number", pattern: /\d+/});
-const Identifier = createToken({name: "Identifier", pattern: /[a-zA-Z_]/});
+const Identifier = createToken({name: "Identifier", pattern: /[a-zA-Z_]+/});
 
 const Plus = createToken({name: "Plus", pattern: /\+/});
 const Minus = createToken({name: "Minus", pattern: /-/});
@@ -12,13 +12,14 @@ const Mod = createToken({name: "Mod", pattern: /%/});
 const LParen = createToken({name: "LParen", pattern: /\(/});
 const RParen = createToken({name: "RParen", pattern: /\)/});
 
-const Arrow = createToken({name: "Arrow", pattern: /=>/});
-const LBrace = createToken({name: "LBrace", pattern: /{/});
-const RBrace = createToken({name: "RBrace", pattern: /}/});
-const Comma = createToken({name: "Comma", pattern: /,/});
-
-const Const = createToken({name: "Const", pattern: /const/});
 const Equal = createToken({name: "Equal", pattern: /=/});
+const Colon = createToken({name: "Colon", pattern: /:/});
+const Dot = createToken({name: "Dot", pattern: /\./});
+const Semi = createToken({name: "Semi", pattern: /;/});
+
+const True = createToken({name: "True", pattern: /true/});
+const False = createToken({name: "False", pattern: /false/});
+const This = createToken({name: "This", pattern: /this/});
 
 const Whitespace = createToken({
     name: "Whitespace",
@@ -36,12 +37,13 @@ const allTokens = [
     Mod,
     LParen,
     RParen,
-    Arrow,
-    LBrace,
-    RBrace,
-    Comma,
-    Const,
     Equal,
+    Colon,
+    Dot,
+    Semi,
+    True,
+    False,
+    This,
     Identifier,
 ];
 
@@ -53,13 +55,24 @@ class TinyParser extends CstParser {
     });
 
     public statement = this.RULE("statement", () => {
-        this.SUBRULE(this.assignment);
+        this.MANY(() => {
+            this.OR([
+                {ALT: () => this.SUBRULE(this.variableAssignment)},
+                {ALT: () => this.SUBRULE(this.sinkAssignment)},
+            ]);
+            this.CONSUME(Semi);
+        })
     });
 
-    public assignment = this.RULE("assignment", () => {
-        this.CONSUME(Const);
+    public variableAssignment = this.RULE("variableAssignment", () => {
         this.CONSUME(Identifier);
         this.CONSUME(Equal);
+        this.SUBRULE(this.expression);
+    });
+
+    public sinkAssignment = this.RULE("sinkAssignment", () => {
+        this.CONSUME(Identifier);
+        this.CONSUME(Colon);
         this.SUBRULE(this.expression);
     });
 
@@ -89,9 +102,32 @@ class TinyParser extends CstParser {
     public factor = this.RULE("factor", () => {
         this.OR([
             {ALT: () => this.SUBRULE(this.parenthesis)},
-            {ALT: () => this.CONSUME(Identifier)},
-            {ALT: () => this.CONSUME(Number)},
+            {ALT: () => this.SUBRULE(this.booleanLiteral)},
+            {ALT: () => this.SUBRULE(this.sourceReference)},
+            {ALT: () => this.SUBRULE(this.variableReference)},
+            {ALT: () => this.SUBRULE(this.numberLiteral)},
         ]);
+    });
+
+    public sourceReference = this.RULE("sourceReference", () => {
+        this.CONSUME(This);
+        this.CONSUME(Dot);
+        this.CONSUME(Identifier, {LABEL: "source"});
+    });
+
+    public variableReference = this.RULE("variableReference", () => {
+        this.CONSUME(Identifier, {LABEL: "variable"});
+    });
+
+    public booleanLiteral = this.RULE("booleanLiteral", () => {
+        this.OR([
+            {ALT: () => this.CONSUME(True)},
+            {ALT: () => this.CONSUME(False)},
+        ]);
+    });
+
+    public numberLiteral = this.RULE("numberLiteral", () => {
+        this.CONSUME(Number, {LABEL: "literal"});
     });
 
     public parenthesis = this.RULE("parenthesis", () => {
