@@ -29,7 +29,10 @@ class SExpressionVisitor extends BaseCstVisitor {
 
     program(ctx: ProgramCstChildren): string {
         if (ctx.statement) {
-            return `(program ${this.visit(ctx.statement)})`;
+            return `(program\n    ${
+                ctx.statement.map(node => this.visit(node))
+                  .join("\n    ")
+            })`;
         } else {
             return "(program)";
         }

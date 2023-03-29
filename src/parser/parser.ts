@@ -68,12 +68,10 @@ class TinyParser extends CstParser {
     });
 
     public statement = this.RULE("statement", () => {
-        this.MANY(() => {
-            this.OR([
-                {ALT: () => this.SUBRULE(this.variableAssignment)},
-                {ALT: () => this.SUBRULE(this.sinkAssignment)},
-            ]);
-        })
+        this.OR([
+            {ALT: () => this.SUBRULE(this.variableAssignment)},
+            {ALT: () => this.SUBRULE(this.sinkAssignment)},
+        ]);
     });
 
     public variableAssignment = this.RULE("variableAssignment", () => {

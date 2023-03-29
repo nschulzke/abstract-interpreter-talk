@@ -9,6 +9,7 @@ import {readFile} from "fs/promises";
     const filename = process.argv[2];
     if (filename) {
         const input = await readFile(filename, "utf-8");
+        console.log(input);
         const cst = parse(input);
         console.log(cstToString(cst));
     } else {

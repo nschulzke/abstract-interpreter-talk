@@ -1,4 +1,4 @@
-i = x + 10
-j = y - 10
+i = this.x + 10
+j = this.y - 10
 
 z: i * j
