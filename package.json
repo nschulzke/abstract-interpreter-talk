@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx ts-node src/main.ts",
+    "printer": "npx ts-node src/main_printer.ts",
+    "concrete": "npx ts-node src/main_concrete.ts",
+    "abstract": "npx ts-node src/main_abstract.ts",
     "build": "npx tsc",
     "gendts": "npx ts-node src/scripts/gen_dts_signatures.ts"
   },
