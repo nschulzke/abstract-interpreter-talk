@@ -112,8 +112,11 @@ class AbstractInterpreterVisitor<TSources extends Record<string, AbstractTinyVal
             return undefined;
         }
 
+        const possibleConsequents = consequents.filter((consequent, index) =>
+            index >= ctx.whenClause.length || (predicates[index] as AbstractBoolean).includes(true)
+        );
         // If we get here, we know all the consequents are of the same type.
-        return consequents.reduce((a, b) => a?.union(b as any));
+        return possibleConsequents.reduce((a, b) => a?.union(b as any));
     }
 
     whenClause(ctx: WhenClauseCstChildren): AbstractTinyValue {
