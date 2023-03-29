@@ -14,8 +14,8 @@ import {
     ArithmeticExpressionCstChildren,
     ComparisonExpressionCstChildren,
     ChooseExpressionCstChildren, WhenClauseCstChildren, OtherwiseClauseCstChildren
-} from "./json_cst";
-import {BaseCstVisitor} from "./parser";
+} from "../ast";
+import {BaseCstVisitor} from "../parser/parser";
 import {CstNode} from "chevrotain";
 
 /**

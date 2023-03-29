@@ -16,10 +16,14 @@ import {
     VariableAssignmentCstChildren,
     VariableReferenceCstChildren,
     WhenClauseCstChildren
-} from "./json_cst";
-import {BaseCstVisitor} from "./parser";
+} from "../ast";
+import {BaseCstVisitor} from "../parser/parser";
 import {CstNode} from "chevrotain";
-import {TinyValue} from "./types";
+
+export type TinyValue =
+  | boolean
+  | number
+  | undefined;
 
 class InterpreterVisitor<TSources extends Record<string, TinyValue>> extends BaseCstVisitor {
     sources: TSources;

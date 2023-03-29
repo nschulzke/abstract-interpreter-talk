@@ -5,9 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "npx ts-node src/main.ts",
-    "start-notypecheck": "npx ts-node --transpile-only src/main.ts",
     "build": "npx tsc",
-    "gendts": "npx ts-node src/gen_dts_signatures.ts"
+    "gendts": "npx ts-node src/scripts/gen_dts_signatures.ts"
   },
   "keywords": [],
   "author": "",
