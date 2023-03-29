@@ -1,0 +1,2 @@
+z: when this.x < 5 10
+   otherwise 20

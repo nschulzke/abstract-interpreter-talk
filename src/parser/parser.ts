@@ -187,7 +187,9 @@ class TinyParser extends CstParser {
     });
 
     constructor() {
-        super(allTokens);
+        super(allTokens, {
+            nodeLocationTracking: "full"
+        });
         this.performSelfAnalysis();
     }
 }

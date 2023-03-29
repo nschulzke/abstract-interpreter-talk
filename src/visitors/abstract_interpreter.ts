@@ -70,14 +70,50 @@ class AbstractInterpreterVisitor<TSources extends Record<string, AbstractTinyVal
     }
 
     chooseExpression(ctx: ChooseExpressionCstChildren): AbstractTinyValue {
-        const whenClauses = ctx.whenClause?.filter((whenClause) =>
-            this.visit(whenClause.children.predicate).includes(true)
+        const predicates = ctx.whenClause.map((whenClause) =>
+            this.visit(whenClause.children.predicate) as AbstractTinyValue
         );
-        const consequents: AbstractTinyValue[] = whenClauses.map((whenClause) =>
+
+        // Check that all when clause predicates are of boolean type
+        const nonBooleanWhenClauses = ctx.whenClause.filter((whenClause, index) =>
+            !(predicates[index] instanceof AbstractBoolean)
+        );
+        if (nonBooleanWhenClauses.length) {
+            for (const clause of nonBooleanWhenClauses) {
+                const predicate = clause.children.predicate[0];
+                console.error(`When clause predicate is not a boolean at ${predicate.location?.startLine}:${predicate.location?.startColumn}`);
+            }
+            return undefined;
+        }
+
+        // Check that all when clause predicates are possible
+        const impossibleWhenClauses = ctx.whenClause.filter((whenClause, index) =>
+            !(predicates[index] as AbstractBoolean).includes(true)
+        );
+        if (impossibleWhenClauses.length) {
+            for (let impossibleWhenClause of impossibleWhenClauses) {
+                console.warn(`When clause predicate will never be true at ${impossibleWhenClause.location?.startLine}:${impossibleWhenClause.location?.startColumn}`)
+            }
+        }
+
+        const consequents: AbstractTinyValue[] = ctx.whenClause.map((whenClause) =>
             this.visit(whenClause.children.consequent)
         );
-        // TODO: Reduce to a single abstract value
-        throw Error("Not implemented")
+        consequents.push(this.visit(ctx.otherwiseClause[0]));
+
+        const consequentClasses = consequents.map((consequent) => consequent?.constructor);
+        const mismatchedWhenClauses = ctx.whenClause.filter((whenClause, index) =>
+            consequentClasses[index] !== consequentClasses[0]
+        );
+        if (mismatchedWhenClauses.length) {
+            for (const clause of mismatchedWhenClauses) {
+                console.error(`When clause consequent has wrong type at ${clause.location?.startLine}:${clause.location?.startColumn}`);
+            }
+            return undefined;
+        }
+
+        // If we get here, we know all the consequents are of the same type.
+        return consequents.reduce((a, b) => a?.union(b as any));
     }
 
     whenClause(ctx: WhenClauseCstChildren): AbstractTinyValue {
@@ -188,32 +224,33 @@ export function abstractInterpret(cst: CstNode, sources: Record<string, Abstract
 type Interval = typeof Interval;
 
 export class AbstractNumber {
-    private readonly interval: Interval
+    private readonly _interval: Interval
 
     constructor(interval: Interval = Interval(-Infinity, Infinity)) {
-        this.interval = interval;
+        this._interval = interval;
     }
 
     add(other: AbstractNumber): AbstractNumber {
-        return new AbstractNumber(Interval.add(this.interval, other.interval));
+        return new AbstractNumber(Interval.add(this._interval, other._interval));
     }
 
     sub(other: AbstractNumber): AbstractNumber {
-        return new AbstractNumber(Interval.sub(this.interval, other.interval));
+        return new AbstractNumber(Interval.sub(this._interval, other._interval));
     }
 
     mul(other: AbstractNumber): AbstractNumber {
-        return new AbstractNumber(Interval.mul(this.interval, other.interval));
+        return new AbstractNumber(Interval.mul(this._interval, other._interval));
     }
 
     div(other: AbstractNumber): AbstractNumber {
-        return new AbstractNumber(Interval.div(this.interval, other.interval));
+        return new AbstractNumber(Interval.div(this._interval, other._interval));
     }
 
     lessThan(other: AbstractNumber): AbstractBoolean {
-        if (Interval.lessThan(this.interval, other.interval)) {
+        debugger;
+        if (Interval.lessThan(this._interval, other._interval)) {
             return new AbstractBoolean([true]);
-        } else if (Interval.greaterThan(this.interval, other.interval)) {
+        } else if (Interval.greaterEqualThan(this._interval, other._interval)) {
             return new AbstractBoolean([false]);
         } else {
             return new AbstractBoolean([true, false]);
@@ -221,9 +258,9 @@ export class AbstractNumber {
     }
 
     greaterThan(other: AbstractNumber): AbstractBoolean {
-        if (Interval.greaterThan(this.interval, other.interval)) {
+        if (Interval.greaterThan(this._interval, other._interval)) {
             return new AbstractBoolean([true]);
-        } else if (Interval.lessThan(this.interval, other.interval)) {
+        } else if (Interval.lessEqualThan(this._interval, other._interval)) {
             return new AbstractBoolean([false]);
         } else {
             return new AbstractBoolean([true, false]);
@@ -231,9 +268,9 @@ export class AbstractNumber {
     }
 
     lessThanOrEqual(other: AbstractNumber): AbstractBoolean {
-        if (Interval.lessThanOrEqual(this.interval, other.interval)) {
+        if (Interval.lessEqualThan(this._interval, other._interval)) {
             return new AbstractBoolean([true]);
-        } else if (Interval.greaterThanOrEqual(this.interval, other.interval)) {
+        } else if (Interval.greaterEqualThan(this._interval, other._interval)) {
             return new AbstractBoolean([false]);
         } else {
             return new AbstractBoolean([true, false]);
@@ -241,9 +278,9 @@ export class AbstractNumber {
     }
 
     greaterThanOrEqual(other: AbstractNumber): AbstractBoolean {
-        if (Interval.greaterThanOrEqual(this.interval, other.interval)) {
+        if (Interval.greaterEqualThan(this._interval, other._interval)) {
             return new AbstractBoolean([true]);
-        } else if (Interval.lessThanOrEqual(this.interval, other.interval)) {
+        } else if (Interval.lessEqualThan(this._interval, other._interval)) {
             return new AbstractBoolean([false]);
         } else {
             return new AbstractBoolean([true, false]);
@@ -251,7 +288,7 @@ export class AbstractNumber {
     }
 
     equal(other: AbstractNumber): AbstractBoolean {
-        if (Interval.intervalsOverlap(this.interval, other.interval)) {
+        if (Interval.intervalsOverlap(this._interval, other._interval)) {
             return new AbstractBoolean([false]);
         } else {
             return new AbstractBoolean([true, false]);
@@ -259,31 +296,39 @@ export class AbstractNumber {
     }
 
     notEqual(other: AbstractNumber): AbstractBoolean {
-        if (Interval.intervalsOverlap(this.interval, other.interval)) {
+        if (Interval.intervalsOverlap(this._interval, other._interval)) {
             return new AbstractBoolean([true]);
         } else {
             return new AbstractBoolean([true, false]);
         }
     }
 
+    union(other: AbstractNumber): AbstractNumber {
+        return new AbstractNumber(Interval.hull(this._interval, other._interval));
+    }
+
+    interval(): Interval {
+        return this._interval;
+    }
+
     toString() {
-        return `[${this.interval.lo},${this.interval.hi}]`;
+        return `[${this._interval.lo},${this._interval.hi}]`;
     }
 }
 
 export class AbstractBoolean {
-    private readonly values: Set<boolean>;
+    private readonly _values: Set<boolean>;
 
     constructor(values: boolean[] = [true, false]) {
-        this.values = new Set(values);
+        this._values = new Set(values);
     }
 
     and(other: AbstractBoolean): AbstractBoolean {
         const newValues: boolean[] = [];
-        if (this.values.has(false) || other.values.has(false)) {
+        if (this._values.has(false) || other._values.has(false)) {
             newValues.push(false);
         }
-        if (this.values.has(true) && other.values.has(true)) {
+        if (this._values.has(true) && other._values.has(true)) {
             newValues.push(true);
         }
         return new AbstractBoolean(newValues);
@@ -291,16 +336,28 @@ export class AbstractBoolean {
 
     or(other: AbstractBoolean): AbstractBoolean {
         const newValues: boolean[] = [];
-        if (this.values.has(true) || other.values.has(true)) {
+        if (this._values.has(true) || other._values.has(true)) {
             newValues.push(true);
         }
-        if (this.values.has(false) && other.values.has(false)) {
+        if (this._values.has(false) && other._values.has(false)) {
             newValues.push(false);
         }
         return new AbstractBoolean(newValues);
     }
 
+    union(other: AbstractBoolean): AbstractBoolean {
+        return new AbstractBoolean([...this._values, ...other._values]);
+    }
+
+    includes(bool: boolean): boolean {
+        return this._values.has(bool);
+    }
+
+    values(): boolean[] {
+        return [...this._values];
+    }
+
     toString() {
-        return this.values.has(true) && this.values.has(false) ? "{true,false}" : this.values.has(true) ? "{true}" : "{false}";
+        return this._values.has(true) && this._values.has(false) ? "{true,false}" : this._values.has(true) ? "{true}" : "{false}";
     }
 }

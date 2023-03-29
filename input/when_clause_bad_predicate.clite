@@ -1,0 +1,3 @@
+z: when this.x < 5 10
+   when this.y 10
+   otherwise 20
