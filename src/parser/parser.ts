@@ -1,4 +1,4 @@
-import {createToken, CstNode, CstParser, Lexer, Rule} from "chevrotain";
+import {createToken, CstNode, CstParser, Lexer, nodeLocationTrackingOptions, Rule} from "chevrotain";
 
 const Number = createToken({name: "Number", pattern: /\d+/});
 const Identifier = createToken({name: "Identifier", pattern: /[a-zA-Z_]+/});
@@ -186,17 +186,18 @@ class TinyParser extends CstParser {
         this.CONSUME(RParen);
     });
 
-    constructor() {
+    constructor(nodeLocationTracking: nodeLocationTrackingOptions) {
         super(allTokens, {
-            nodeLocationTracking: "full"
+            nodeLocationTracking
         });
         this.performSelfAnalysis();
     }
 }
 
-export const BaseCstVisitor = new TinyParser().getBaseCstVisitorConstructor();
+export const BaseCstVisitor = new TinyParser("full").getBaseCstVisitorConstructor();
 
-const parser = new TinyParser()
+const parser = new TinyParser("full")
+const noLocationParser = new TinyParser("none")
 
 export const productions: Record<string, Rule> = parser.getGAstProductions()
 
@@ -208,6 +209,18 @@ export function parse(input: string): CstNode {
 
     if (parser.errors.length > 0) {
         console.log("Parse errors: ", parser.errors);
+    }
+    return cst;
+}
+
+export function parseLight(input: string): CstNode {
+    const lexingResult = TinyLexer.tokenize(input);
+    noLocationParser.reset();
+    noLocationParser.input = lexingResult.tokens;
+    const cst = noLocationParser.program();
+
+    if (noLocationParser.errors.length > 0) {
+        console.log("Parse errors: ", noLocationParser.errors);
     }
     return cst;
 }

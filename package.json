@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "stringify": "npx ts-node src/main_stringify.ts",
     "printer": "npx ts-node src/main_printer.ts",
     "concrete": "npx ts-node src/main_concrete.ts",
     "abstract": "npx ts-node src/main_abstract.ts",
@@ -19,10 +20,12 @@
     "chevrotain": "^10.5.0",
     "interval-arithmetic": "^1.1.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "graphviz": "^0.0.9"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",
+    "@types/graphviz": "^0.0.35",
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^10.0.13",
     "ts-mocha": "^10.0.0",
