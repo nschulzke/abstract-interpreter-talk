@@ -14,15 +14,13 @@ const sources: Record<string, TinyValue> = {
     const filename = process.argv[2];
     if (filename) {
         const input = await readFile(filename, "utf-8");
-        const cst = parse(input);
-        console.log(interpret(cst, sources));
+        console.log(interpret(input, sources));
     } else {
         const rl = readline.createInterface({input, output});
         let text = "";
         do {
             text = await rl.question("> ");
-            const cst = parse(text);
-            console.log(interpret(cst, sources));
+            console.log(interpret(text, sources));
         } while (text !== "");
     }
 })();

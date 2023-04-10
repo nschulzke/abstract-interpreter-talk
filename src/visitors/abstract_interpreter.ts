@@ -17,7 +17,7 @@ import {
     VariableReferenceCstChildren,
     WhenClauseCstChildren
 } from "../ast";
-import {BaseCstVisitor} from "../parser/parser";
+import {BaseCstVisitor, parse} from "../parser/parser";
 import {CstNode} from "chevrotain";
 import Interval from "interval-arithmetic";
 
@@ -27,14 +27,12 @@ export type AbstractTinyValue =
   | undefined;
 
 class AbstractInterpreterVisitor<TSources extends Record<string, AbstractTinyValue>> extends BaseCstVisitor {
-    sources: TSources;
     variables: Record<string, AbstractTinyValue> = {};
     sinks: Record<string, AbstractTinyValue> = {};
 
-    constructor(sources: TSources) {
+    constructor(private sources: TSources, private input: string) {
         super();
         this.validateVisitor();
-        this.sources = sources;
     }
 
     program(ctx: ProgramCstChildren) {
@@ -81,7 +79,8 @@ class AbstractInterpreterVisitor<TSources extends Record<string, AbstractTinyVal
         if (nonBooleanWhenClauses.length) {
             for (const clause of nonBooleanWhenClauses) {
                 const predicate = clause.children.predicate[0];
-                console.error(`When clause predicate is not a boolean at ${predicate.location?.startLine}:${predicate.location?.startColumn}`);
+                const text = this.input.slice(predicate.location!.startOffset!, predicate.location!.endOffset! + 1);
+                console.error(`When clause predicate \`${text}\` is not a boolean at ${predicate.location?.startLine}:${predicate.location?.startColumn}`);
             }
             return undefined;
         }
@@ -92,7 +91,9 @@ class AbstractInterpreterVisitor<TSources extends Record<string, AbstractTinyVal
         );
         if (impossibleWhenClauses.length) {
             for (let impossibleWhenClause of impossibleWhenClauses) {
-                console.warn(`When clause predicate will never be true at ${impossibleWhenClause.location?.startLine}:${impossibleWhenClause.location?.startColumn}`)
+                const predicate = impossibleWhenClause.children.predicate[0];
+                const text = this.input.slice(predicate.location!.startOffset!, predicate.location!.endOffset! + 1);
+                console.warn(`When clause predicate \`${text}\` will never be true at ${predicate.location?.startLine}:${predicate.location?.startColumn}`)
             }
         }
 
@@ -107,7 +108,9 @@ class AbstractInterpreterVisitor<TSources extends Record<string, AbstractTinyVal
         );
         if (mismatchedWhenClauses.length) {
             for (const clause of mismatchedWhenClauses) {
-                console.error(`When clause consequent has wrong type at ${clause.location?.startLine}:${clause.location?.startColumn}`);
+                const consequent = clause.children.consequent[0];
+                const text = this.input.slice(consequent.location!.startOffset!, consequent.location!.endOffset! + 1);
+                console.error(`When clause consequent \`${text}\` has wrong type at ${consequent.location?.startLine}:${consequent.location?.startColumn}`);
             }
             return undefined;
         }
@@ -218,8 +221,9 @@ class AbstractInterpreterVisitor<TSources extends Record<string, AbstractTinyVal
     }
 }
 
-export function abstractInterpret(cst: CstNode, sources: Record<string, AbstractTinyValue>): Record<string, AbstractTinyValue> {
-    const visitor = new AbstractInterpreterVisitor(sources);
+export function abstractInterpret(input: string, sources: Record<string, AbstractTinyValue>): Record<string, AbstractTinyValue> {
+    const cst = parse(input);
+    const visitor = new AbstractInterpreterVisitor(sources, input);
     visitor.visit(cst);
     return visitor.sinks;
 }
@@ -250,7 +254,6 @@ export class AbstractNumber {
     }
 
     lessThan(other: AbstractNumber): AbstractBoolean {
-        debugger;
         if (Interval.lessThan(this._interval, other._interval)) {
             return new AbstractBoolean([true]);
         } else if (Interval.greaterEqualThan(this._interval, other._interval)) {

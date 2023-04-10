@@ -17,7 +17,7 @@ import {
     VariableReferenceCstChildren,
     WhenClauseCstChildren
 } from "../ast";
-import {BaseCstVisitor} from "../parser/parser";
+import {BaseCstVisitor, parse} from "../parser/parser";
 import {CstNode} from "chevrotain";
 
 export type TinyValue =
@@ -174,7 +174,8 @@ class InterpreterVisitor<TSources extends Record<string, TinyValue>> extends Bas
     }
 }
 
-export function interpret(cst: CstNode, sources: Record<string, TinyValue>): Record<string, TinyValue> {
+export function interpret(input: string, sources: Record<string, TinyValue>): Record<string, TinyValue> {
+    const cst = parse(input);
     const visitor = new InterpreterVisitor(sources);
     visitor.visit(cst);
     return visitor.sinks;
