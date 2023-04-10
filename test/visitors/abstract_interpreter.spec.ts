@@ -40,7 +40,7 @@ describe("abstract interpreter", () => {
     expect(result).toEqual({z: undefined});
 
     expect(error.calledOnce).toBe(true);
-    expect(error.firstCall.args[0]).toBe("When clause predicate `this.y` is not a boolean at 3:15");
+    expect(error.firstCall.args[0]).toBe("When clause predicate `this.y` is of type undefined, not boolean at 3:15");
     sinon.restore();
   });
 
@@ -56,7 +56,7 @@ describe("abstract interpreter", () => {
     expect(result).toEqual({z: undefined});
 
     expect(error.calledOnce).toBe(true);
-    expect(error.firstCall.args[0]).toBe("When clause consequent `true` has wrong type at 3:26");
+    expect(error.firstCall.args[0]).toBe("When clause consequent `true` is of type boolean but expected number at 3:26");
   });
 
   it("warns about an impossible predicate", () => {
