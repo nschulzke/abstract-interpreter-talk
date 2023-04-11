@@ -3,6 +3,7 @@
 ## Syntax Trees
 
 ```sh
+nvm use
 npm run stringify
 ```
 
@@ -13,6 +14,7 @@ npm run stringify
 ## Visitors
 
 ```sh
+nvm use
 npm run printer
 ```
 
@@ -22,6 +24,7 @@ npm run printer
 ## Interpreters
 
 ```sh
+nvm use
 npm run concrete
 ```
 
@@ -30,6 +33,7 @@ npm run concrete
 ## Abstract Interpreters
 
 ```sh
+nvm use
 npm run abstract
 ```
 
