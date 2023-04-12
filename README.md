@@ -4,8 +4,10 @@
 
 ```sh
 nvm use
-npm run stringify
+npm run stringify input.clite
 ```
+
+[Input File](./input.clite)
 
 [Ouptut Image](./output.png)
 
@@ -15,8 +17,10 @@ npm run stringify
 
 ```sh
 nvm use
-npm run printer
+npm run printer input.clite
 ```
+
+[Input File](./input.clite)
 
 [Printer Visitor](./src/visitors/pretty_print.ts)
 
@@ -25,8 +29,10 @@ npm run printer
 
 ```sh
 nvm use
-npm run concrete
+npm run concrete input.clite
 ```
+
+[Input File](./input.clite)
 
 [Interpreter](./src/visitors/interpreter.ts)
 
@@ -34,7 +40,9 @@ npm run concrete
 
 ```sh
 nvm use
-npm run abstract
+npm run abstract input.clite
 ```
+
+[Input File](./input.clite)
 
 [Abstract Interpreter](./src/visitors/abstract_interpreter.ts)

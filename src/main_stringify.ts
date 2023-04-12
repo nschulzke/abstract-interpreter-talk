@@ -12,7 +12,9 @@ import {outputCstImage} from "./visitors/graphviz";
         const input = await readFile(filename, "utf-8");
         console.log(input);
         const cst = parseLight(input);
-        console.log(cstToString(cst));
+        await writeFile("output.json", JSON.stringify(cst, null, 2));
+        await outputCstImage("output.png", cst);
+        console.log("Output written to output.json and output.png")
     } else {
         const rl = readline.createInterface({input, output});
         let text = "";
