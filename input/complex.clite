@@ -1,0 +1,8 @@
+i = this.x + 10
+j = this.y - 10
+
+a: when this.x < 5 10
+   when this.x < 7 5
+   otherwise 20
+
+z: i * j
