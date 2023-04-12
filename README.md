@@ -24,6 +24,8 @@ npm run printer input.clite
 
 [Printer Visitor](./src/visitors/pretty_print.ts)
 
+[Graph Visitor](./src/visitors/graphviz.ts)
+
 
 ## Interpreters
 
