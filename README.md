@@ -4,12 +4,12 @@
 
 [Driver](./src/main_stringify.ts)
 
+[Input File](./input.clite)
+
 ```sh
 nvm use
 npm run stringify input.clite
 ```
-
-[Input File](./input.clite)
 
 [Ouptut Image](./output.png)
 
@@ -19,12 +19,12 @@ npm run stringify input.clite
 
 [Driver](./src/main_printer.ts)
 
+[Input File](./input.clite)
+
 ```sh
 nvm use
 npm run printer input.clite
 ```
-
-[Input File](./input.clite)
 
 [Printer Visitor](./src/visitors/pretty_print.ts)
 
@@ -35,12 +35,12 @@ npm run printer input.clite
 
 [Driver](./src/main_concrete.ts)
 
+[Input File](./input.clite)
+
 ```sh
 nvm use
 npm run concrete input.clite
 ```
-
-[Input File](./input.clite)
 
 [Interpreter](./src/visitors/interpreter.ts) 
 
@@ -48,11 +48,11 @@ npm run concrete input.clite
 
 [Driver](./src/main_abstract.ts)
 
+[Input File](./input.clite)
+
 ```sh
 nvm use
 npm run abstract input.clite
 ```
-
-[Input File](./input.clite)
 
 [Abstract Interpreter](./src/visitors/abstract_interpreter.ts)
